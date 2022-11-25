@@ -1,0 +1,67 @@
+#!/usr/bin/php
+<?php
+require __DIR__ . '/vendor/autoload.php';
+
+use Interpreter\Strategies\Entes;
+use Interpreter\Strategies\PagoDirecto;
+use Interpreter\Interpreter;
+
+if (php_sapi_name() != "cli") {
+    exit("cli only");
+}
+
+if ($argc < 4) {
+    exit('Missing args!');
+}
+
+if ($argc > 4) {
+    exit('Too many args!');
+}
+
+if ( !file_exists($argv[1]) ) {
+    exit("can' t access file ($argv[1])");
+}
+
+if (!file_exists($argv[2])) {
+    exit("can't access file {$argv[2]}");
+}
+
+if (!file_exists($argv[3])) {
+    exit("can't access file {$argv[3]}");
+}
+
+$strategy = null;
+$results = [];
+$total_cobros = 0;
+$total_registros_cobrados = 0;
+$promedios = "\n";
+
+for ($i=1; $i<sizeof($argv); $i++) { 
+    $temp_file = file($argv[$i]);
+
+    if (substr($temp_file[0],0,6) === "HEADER") {
+        $strategy = new Entes;
+    } else {
+        $strategy = new PagoDirecto;
+    }
+    
+    $interpreter = new Interpreter($strategy);
+    $result = $interpreter->process_file(file($argv[$i]));
+    $results[] = $result;
+    $promedios = $promedios." Archivo: {$argv[$i]} Promedio de Cobro: {$result['promedio']} \n";
+}
+
+foreach ($results as $r) {
+    $total_cobros+= $r["total_cobrado"];
+    $total_registros_cobrados+= $r['total_registros_cobrados'];
+}
+
+echo "\n Total Registros Cobrados \t Total Cobrado \n";
+echo " {$total_registros_cobrados} \t {$total_cobros}";
+echo " {$promedios}";
+
+
+
+
+
+

@@ -1,0 +1,8 @@
+{
+    "autoload": {
+        "psr-4": {
+            "Interpreter\\": "Interpreter/",
+            "Interpreter\\Strategies\\": "Interpreter/Strategies/"
+        }
+    }
+}
